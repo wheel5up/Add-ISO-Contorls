@@ -1,1 +1,303 @@
-
+{
+	"info": {
+		"_postman_id": "3b6d6585-0b8c-4bf6-b7c2-636acd39720d",
+		"name": "Add ISO Controls",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "search for confluence page",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "83b89637-7733-48de-ad62-b261d0fd720c",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8dcd16b8-c642-4f78-8641-3f9a03e54c92",
+						"exec": [
+							" pm.test('Determining workflow:create or update page', function () {",
+							"    var response = pm.response.json();",
+							"    var html = \"<ac:layout><ac:layout-section ac:type=\\\"two_equal\\\"><ac:layout-cell><h2>Definition</h2><p><br /></p><ac:structured-macro ac:name=\\\"details\\\" ac:schema-version=\\\"1\\\" ac:macro-id=\\\"ad531b4d-a4a1-4000-b69e-0e097244798b\\\"><ac:rich-text-body><p><br /></p><table data-layout=\\\"default\\\"><colgroup><col /><col /></colgroup><tbody><tr><th><p><strong>Domain</strong></p></th><td><p>Information security policies</p></td></tr><tr><th><p><strong>Sub Domain</strong></p></th><td><p>Management direction for information security</p></td></tr><tr><th><p><strong>Control Name</strong></p></th><td><p>Policies for information security</p></td></tr><tr><th><p><strong>Control Reference</strong></p></th><td><p>A.5.1.1</p></td></tr><tr><th><p><strong>Control Description</strong></p></th><td><p>A set of policies for information security shall be defined, approved by management, published and communicated to employees and relevant external parties.</p></td></tr></tbody></table><p class=\\\"auto-cursor-target\\\"><br /></p></ac:rich-text-body></ac:structured-macro><p class=\\\"auto-cursor-target\\\"><br /></p></ac:layout-cell><ac:layout-cell><p class=\\\"auto-cursor-target\\\"><br /></p><ac:structured-macro ac:name=\\\"note\\\" ac:schema-version=\\\"1\\\" ac:macro-id=\\\"19b3a146-341a-472e-bdaa-45febcbd438b\\\"><ac:rich-text-body><p>This page is auto generated. Changes may be overwritten.</p></ac:rich-text-body></ac:structured-macro><ac:structured-macro ac:name=\\\"toc\\\" ac:schema-version=\\\"1\\\" ac:macro-id=\\\"5afbd337-9992-439b-8028-051f4b94eeb0\\\" /><ac:structured-macro ac:name=\\\"qc-doc-citation-macro\\\" ac:schema-version=\\\"1\\\" ac:macro-id=\\\"d6d39a49-f9fa-47f0-b0c5-c01ee4d5ae1f\\\" /></ac:layout-cell></ac:layout-section><ac:layout-section ac:type=\\\"single\\\"><ac:layout-cell><h2>Controls</h2><ac:structured-macro ac:name=\\\"detailssummary\\\" ac:schema-version=\\\"3\\\" ac:macro-id=\\\"ffcbafc6-5f99-4374-adca-de476bff6fd1\\\"><ac:parameter ac:name=\\\"headings\\\">Control Requirements, Control Response, Updated</ac:parameter><ac:parameter ac:name=\\\"cql\\\">label = &quot;tsc&quot; and label = &quot;replace_this_label&quot; and space = currentSpace ( )</ac:parameter></ac:structured-macro></ac:layout-cell></ac:layout-section></ac:layout>\";",
+							"    var itrobj = pm.iterationData.toObject();",
+							"    console.log(itrobj);",
+							"    Object.keys(itrobj).forEach(function (tblkey) {",
+							"//      This regex expects to find a value in an html table since I'm generating these pages from the HTML above, this is a good assumption",
+							"        var regexr = new RegExp('('+tblkey+'<\\/strong><\\/p><\\/th><td><p>)([^<]+)');",
+							"        //console.log('regexi value: '+regexr);",
+							"        //console.log('Replacing value');",
+							"        html = html.replace(regexr,\"$1\"+itrobj[tblkey]);",
+							"//       console.log(html);",
+							"    });",
+							"// need to replace the embedded label in the cql query on the page",
+							"    var newLabel = itrobj['Control Reference'].replace(/\\./g,\"_\");",
+							"    console.log(\"new label: \"+newLabel);",
+							"    html = html.replace(/replace_this_label/,newLabel);",
+							"    pm.environment.set(\"newLabel\", newLabel);",
+							"    if (Array.isArray(response.results) && !response.results.length){",
+							"        //no result or search for this page found. Create page",
+							"        postman.setNextRequest(\"create confluence page\");",
+							"        console.log('No page exists! Create new page'+response.results.length);",
+							"        pm.environment.set(\"body\",JSON.stringify(html));",
+							"    } else if(Array.isArray(response.results) && response.results.length == 1) {",
+							"        //one result or search for this page found. Go update",
+							"        postman.setNextRequest(\"update confluence page\");",
+							"//        var html = response.results[0].body.storage.value;",
+							"        console.log('Found a page! Update existing page'+response.results.length);",
+							"        console.log(html);",
+							"        pm.environment.set(\"id\", response.results[0].id);",
+							"        pm.environment.set(\"version_number\", response.results[0].version.number +1);",
+							"        pm.environment.set(\"body\",JSON.stringify(html));",
+							"//        pm.environment.set(\"title\",itrobj['Control Reference']+\" \"+itrobj['Control Name']);",
+							"    } else {",
+							"        //error condition no action",
+							"        console.log('search turned up multiple results. This is not expected'+response.result.length);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{jira_token}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{jira_user}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer YCQtH9ZSvcsYTRKqxLDJC224",
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "https://{{jira_host}}/wiki/rest/api/content/search?expand=body.storage,metadata.properties,history.nextVersion,version,metadata.labels,space&cql=title=\"{{pageName}}\" and space=SEC and type=page",
+					"protocol": "https",
+					"host": [
+						"{{jira_host}}"
+					],
+					"path": [
+						"wiki",
+						"rest",
+						"api",
+						"content",
+						"search"
+					],
+					"query": [
+						{
+							"key": "expand",
+							"value": "body.storage,metadata.properties,history.nextVersion,version,metadata.labels,space"
+						},
+						{
+							"key": "cql",
+							"value": "title=\"{{pageName}}\" and space=SEC and type=page"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create confluence page",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fb959d44-c113-49c7-a756-1b4e010c8a45",
+						"exec": [
+							"pm.test ('Create user page in confluence',function (){",
+							"    if(pm.response.code == '200') {",
+							"        postman.setNextRequest(null);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0f591a56-f8c7-4c1b-87e7-852d15d73b57",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{jira_token}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{jira_user}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer YCQtH9ZSvcsYTRKqxLDJC224",
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"space\": {\n\t\t\"key\": \"SEC\"\n\t},\n\t\"title\":\"{{pageName}}\",\n\t\"type\":\"page\",\n\t\"ancestors\":[{\n\t\t\"type\":\"page\",\n\t\t\"id\":\"1125285897\"\n\t}],\n\t\"body\": {\n\t\t\"storage\": {\n\t\t\t\"value\": {{body}},\n\t\t\t\"representation\":\"storage\"\n\t\t}\n\t},\n\t\"metadata\": {\n\t\t\"labels\":[{\n\t\t\t\"name\": \"iso\"\n\t\t}, {\n\t\t\t\"name\": \"27001\"\n\t\t}, {\n\t\t\t\"name\": \"{{newLabel}}\"\n\t\t}]\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://{{jira_host}}/wiki/rest/api/content",
+					"protocol": "https",
+					"host": [
+						"{{jira_host}}"
+					],
+					"path": [
+						"wiki",
+						"rest",
+						"api",
+						"content"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update confluence page",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8fecd283-1e57-4265-a65b-4f4a7e0f91c7",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bf11a16f-77a4-44d2-b64b-43fbf417c5a4",
+						"exec": [
+							"pm.test ('Create user page in confluence',function (){",
+							"   if(pm.response.code == '200') {",
+							"        postman.setNextRequest(null);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{jira_token}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{jira_user}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer YCQtH9ZSvcsYTRKqxLDJC224",
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": {{id}},\n\t\"version\": {\n\t\t\"number\":{{version_number}}\n\t},\n\t\"type\":\"page\",\n\t\"title\":\"{{pageName}}\",\n\t\"body\": {\n\t\t\"storage\": {\n\t\t\t\"value\":{{body}},\n\t\t\t\"representation\":\"storage\"\n\t\t}\n\t},\n\t\"metadata\": {\n\t\"labels\":[{\n\t\t\t\"name\": \"iso\"\n\t\t}, {\n\t\t\t\"name\": \"27001\"\n\t\t}, {\n\t\t\t\"name\": \"{{newLabel}}\"\n\t\t}]\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://{{jira_host}}/wiki/rest/api/content/{{id}}",
+					"protocol": "https",
+					"host": [
+						"{{jira_host}}"
+					],
+					"path": [
+						"wiki",
+						"rest",
+						"api",
+						"content",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
